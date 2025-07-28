@@ -5,10 +5,13 @@ general:
       _type: console
       level: INFO
 
+  front_end:
+    _type: fastapi
+
 llms:
   reasoning_llm:
     _type: nim
-    model_name: meta/llama-3.1-405b-instruct
+    model_name: nvidia/llama-3.1-nemotron-70b-instruct
     temperature: 0.1
     max_tokens: 2000
     api_key: ${NVIDIA_API_KEY}
@@ -22,7 +25,7 @@ llms:
   
   analysis_llm:
     _type: nim
-    model_name: meta/llama-3.1-405b-instruct
+    model_name: nvidia/llama-3.1-nemotron-70b-instruct
     temperature: 0.2
     max_tokens: 3000
     api_key: ${NVIDIA_API_KEY}
@@ -56,16 +59,14 @@ functions:
   
   analysis_agent:
     _type: tool_calling_agent
-    tool_names:
-      - english_news_search
+    tool_names: []
     llm_name: analysis_llm
     verbose: true
     description: "Analyzes and compares perspectives from different sources"
   
   synthesis_agent:
     _type: tool_calling_agent
-    tool_names:
-      - english_news_search
+    tool_names: []
     llm_name: reasoning_llm
     verbose: true
     description: "Creates comprehensive multi-perspective summaries"
@@ -75,4 +76,4 @@ workflow:
   english_agent: english_news_agent
   chinese_agent: chinese_news_agent
   analysis_agent: analysis_agent
-  synthesis_agent: synthesis_agent
+  synthesis_agent: synthesis_agent 
