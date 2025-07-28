@@ -1,0 +1,101 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024-2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+functions:
+  wikipedia_search:
+    _type: wiki_search
+    max_results: 3
+    description: "Search Wikipedia for factual information and general knowledge on any topic. Use this for historical facts, scientific information, biographies, and general reference questions."
+  
+  web_search:
+    _type: custom_web_search
+    max_results: 5
+    description: "Search the web for current information, news, and real-time data. Use this for recent events, current prices, latest developments, and information not available in Wikipedia."
+  
+  chinese_web_search:
+    _type: chinese_web_search
+    max_results: 5
+    description: "Search the web in Chinese for information from Chinese sources. Use this to get perspectives and information from Chinese websites and sources."
+  
+  document_generator:
+    _type: document_generator
+    output_format: "markdown"
+    description: "Generate formatted documents and summaries based on research findings."
+  
+  english_research_agent:
+    _type: english_research_agent
+    llm_name: nim_llm
+    description: "Conduct comprehensive research in English using Wikipedia and web search."
+  
+  chinese_research_agent:
+    _type: chinese_research_agent
+    llm_name: chinese_llm
+    description: "Conduct comprehensive research in Chinese using Chinese web sources."
+  
+  debate_orchestrator:
+    _type: debate_orchestrator
+    english_llm: nim_llm
+    chinese_llm: chinese_llm
+    rounds: 5
+    description: "Orchestrate a structured debate between English and Chinese perspectives."
+  
+  current_datetime:
+    _type: current_datetime
+    description: "Get the current date and time. Use this when you need to know what day it is or the current time."
+
+llms:
+  nim_llm:
+    _type: nim
+    model_name: meta/llama-3.1-70b-instruct
+    temperature: 0.1
+    max_tokens: 1500
+  
+  chinese_llm:
+    _type: nim
+    model_name: qwen/qwen2-7b-instruct
+    temperature: 0.1
+    max_tokens: 1500
+
+embedders:
+  nv-embedqa-e5-v5:
+    _type: nim
+    model_name: nvidia/nv-embedqa-e5-v5
+
+workflow:
+  _type: react_agent
+  tool_names: [english_research_agent, chinese_research_agent, debate_orchestrator, document_generator, current_datetime]
+  llm_name: nim_llm
+  verbose: true
+  parse_agent_response_max_retries: 3
+  system_prompt: |
+    You are a bilingual research coordinator powered by NVIDIA's LLaMA 70B model. 
+    You coordinate research between English and Chinese sources to provide comprehensive, multi-perspective analysis.
+    
+    Your workflow:
+    1. First, use english_research_agent to research the topic thoroughly in English.
+    2. Then, use chinese_research_agent to research the same topic in Chinese sources.
+    3. Use debate_orchestrator to facilitate a 5-round debate. You MUST provide the input as a JSON string with keys: "topic", "english_position", "chinese_position", and "disagreements".
+    4. Take the output from the debate_orchestrator and pass it as the 'content' for the document_generator to create a final summary.
+    5. When all research, debates, and documents are complete, provide a Final Answer summarizing the work done.
+    
+    You must execute these steps sequentially. Do not skip any steps.
+    
+    IMPORTANT - How to finish:
+    When you have completed all research and document generation, end with:
+    Final Answer: [Your summary of what was accomplished]
+    
+    Do NOT try to call tools like "None" or "No action required". Always end with "Final Answer:" when done.
+    
+    Guidelines:
+    - Always research both English and Chinese perspectives for comprehensive coverage.
+    - After research, ALWAYS facilitate a debate between the perspectives using debate_orchestrator.
+    - Use current_datetime when you need to know the current date or time.
+    - Clearly distinguish between English and Chinese source findings.
+    - Provide cultural and linguistic context when differences exist.
+    - Generate separate summary documents for English and Chinese research.
+    - Include debate outcomes and resolution in final documents when applicable.
+    - Highlight unique insights found in each language's sources and any consensus reached through debate.
+    
+    Available tools: {tool_names}
+    
+    {tools} 
