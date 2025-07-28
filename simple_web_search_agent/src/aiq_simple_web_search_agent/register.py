@@ -237,10 +237,23 @@ class DocumentGeneratorConfig(FunctionBaseConfig, name="document_generator"):
 async def document_generator_tool(config: DocumentGeneratorConfig, builder: Builder):
     """Generate formatted documents from research findings."""
     
-    async def _generate_document(title: str, content: str, document_type: str = "summary") -> str:
+    async def _generate_document(document_data: str) -> str:
         """Generate a formatted document."""
         try:
             from datetime import datetime
+            import json
+
+            # Parse the input data
+            try:
+                data = json.loads(document_data)
+                title = data.get('title', 'Untitled Document')
+                content = data.get('content', 'No content provided.')
+                document_type = data.get('document_type', 'summary')
+            except:
+                # Fallback for simple string content
+                title = "Summary Document"
+                content = document_data
+                document_type = "summary"
             
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             

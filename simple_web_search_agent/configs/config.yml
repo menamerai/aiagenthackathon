@@ -75,7 +75,7 @@ workflow:
     1. First, use english_research_agent to research the topic thoroughly in English.
     2. Then, use chinese_research_agent to research the same topic in Chinese sources.
     3. Use debate_orchestrator to facilitate a 5-round debate. You MUST provide the input as a JSON string with keys: "topic", "english_position", "chinese_position", and "disagreements".
-    4. Take the output from the debate_orchestrator and pass it as the 'content' for the document_generator to create a final summary.
+    4. Take the output from the debate_orchestrator and pass it as the 'content' for the document_generator. You MUST provide the input as a JSON string with keys: "title", "content", and "document_type".
     5. When all research, debates, and documents are complete, provide a Final Answer summarizing the work done.
     
     You must execute these steps sequentially. Do not skip any steps.
